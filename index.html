@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMULADOR DE INGRESOS VIAGO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black: #080808;
+    --black-2: #000000;
+    --paper: #FFFFFF;
+    --paper-dim: #F1F1F1;
+    --green: #39D353;
+    --green-bright: #5FE873;
+    --ink: #101010;
+    --slate: #62676C;
+    --line: #E2E2E2;
+    --milestone: rgba(57,211,83,0.14);
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--black);
+    background-image:
+      radial-gradient(1100px 480px at 12% -10%, rgba(57,211,83,0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(255,255,255,0.04), transparent 55%);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 40px 18px 80px;
+  }
+  .wrap{ max-width: 900px; margin: 0 auto; }
+
+  /* ---- Masthead ---- */
+  .masthead{ text-align:center; color: var(--paper); margin-bottom: 34px; }
+  .masthead .eyebrow{
+    font-size: 12.5px; letter-spacing: 0.14em; color: var(--green-bright);
+    font-weight: 600; margin-bottom: 10px;
+  }
+  .masthead h1{
+    font-family: 'Fraunces', serif; font-optical-sizing: auto; font-weight: 600;
+    font-size: clamp(28px, 5vw, 42px); margin: 0 0 10px; letter-spacing: -0.01em;
+  }
+  .masthead p{
+    font-size: 15px; color: rgba(255,255,255,0.65); max-width: 500px; margin: 0 auto; line-height: 1.5;
+  }
+
+  /* ---- Ticket card ---- */
+  .ticket{
+    background: var(--paper); border-radius: 18px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45); position: relative; margin-bottom: 28px;
+  }
+  .ticket-top{ padding: 28px 32px 22px; }
+  .inputs-grid{
+    display:grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
+  }
+  .field label{ display:block; font-size: 13.5px; color: var(--slate); margin-bottom: 10px; font-weight: 600; }
+  .input-row{ display:flex; align-items:center; gap: 14px; flex-wrap: wrap; }
+  .stepper{
+    display:flex; align-items:center; background: var(--paper-dim);
+    border: 1px solid var(--line); border-radius: 12px; overflow:hidden;
+  }
+  .stepper button{
+    width: 44px; height: 54px; border:none; background:transparent;
+    font-size: 20px; color: var(--ink); cursor:pointer; font-family: 'Inter', sans-serif; font-weight: 700;
+  }
+  .stepper button:hover{ background: rgba(57,211,83,0.16); }
+  .stepper input{
+    width: 68px; height: 54px; border:none; background:transparent; text-align:center;
+    font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--ink);
+    -moz-appearance: textfield;
+  }
+  .stepper.small input{ width: 44px; font-size: 22px; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .stepper input:focus{ outline: 2px solid var(--green); outline-offset: -2px; }
+  .input-hint{ font-size: 12.5px; color: var(--slate); }
+
+  .range-row{ margin-top: 16px; }
+  input[type=range]{ width: 100%; accent-color: var(--green); height: 6px; }
+  .range-labels{ display:flex; justify-content:space-between; font-size: 12px; color: var(--slate); margin-top: 4px; }
+
+  .perf{ position:relative; height: 0; border-top: 2px dashed var(--line); margin: 4px 0 0; }
+  .perf::before, .perf::after{
+    content:""; position:absolute; top:-14px; width: 28px; height: 28px;
+    background: var(--black); border-radius: 50%;
+  }
+  .perf::before{ left: -32px; } .perf::after{ right: -32px; }
+
+  .ticket-bottom{ display:grid; grid-template-columns: 1fr 1fr; }
+  .stub{ padding: 26px 32px 30px; text-align:left; }
+  .stub:first-child{ border-right: 1px dashed var(--line); }
+  .stub .k{ font-size: 12.5px; color: var(--slate); font-weight: 600; margin-bottom: 8px; }
+  .stub .v{ font-family: 'Fraunces', serif; font-size: clamp(26px, 5vw, 36px); font-weight: 600; color: var(--ink); line-height:1.1; }
+  .stub .v.accent{ color: #1F9A3A; }
+  .stub .sub{ font-size: 12.5px; color: var(--slate); margin-top: 6px; }
+
+  .section-title{
+    color: var(--paper); font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600;
+    margin: 6px 0 14px; padding-left: 2px;
+  }
+  .funnel{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
+  .fcard{ background: var(--paper); border-radius: 14px; padding: 18px 16px; text-align:center; }
+  .fcard .num{ font-family:'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--ink); }
+  .fcard .lbl{ font-size: 12px; color: var(--slate); margin-top: 4px; font-weight: 600; }
+
+  .chart-card{ background: var(--paper); border-radius: 16px; padding: 24px 26px 18px; margin-bottom: 26px; }
+  .chart-card h3{ font-family:'Fraunces', serif; font-size: 17px; margin: 0 0 4px; color: var(--ink); }
+  .chart-card .note{ font-size: 12.5px; color: var(--slate); margin-bottom: 18px; }
+  .bars{ display:flex; align-items:flex-end; gap: 10px; height: 170px; }
+  .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end; }
+  .bar{
+    width: 100%; max-width: 46px; background: linear-gradient(180deg, var(--green-bright), var(--green));
+    border-radius: 6px 6px 0 0; transition: height 0.4s ease;
+  }
+  .bar-col .m-lbl{ font-size: 11px; color: var(--slate); margin-top: 6px; font-weight: 600; }
+  .bar-col .m-val{ font-size: 10px; color: var(--slate); margin-bottom: 4px; font-weight: 600; }
+
+  .table-card{ background: var(--paper); border-radius: 16px; padding: 8px 0 4px; margin-bottom: 26px; }
+  .table-scroll{ overflow-x:auto; overflow-y:auto; max-height: 480px; }
+  table{ width:100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+  thead th{
+    position: sticky; top:0; background: var(--paper);
+    text-align:right; padding: 14px 12px 10px; color: var(--slate); font-weight: 600;
+    font-size: 11.5px; letter-spacing: 0.03em; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  thead th:first-child, tbody td:first-child{ text-align:left; }
+  tbody td{ padding: 9px 12px; text-align:right; border-bottom: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr.milestone td{ background: var(--milestone); font-weight:700; }
+  tbody tr.year-total td{ background: var(--paper-dim); font-weight: 700; border-top: 1px solid var(--line); border-bottom: 2px solid var(--line); }
+  tfoot td{ padding: 14px 12px; text-align:right; font-weight: 700; color: var(--ink); border-top: 2px solid var(--black); }
+  tfoot td:first-child{ text-align:left; }
+
+  details.adv{
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px; padding: 4px 20px; margin-bottom: 20px;
+  }
+  details.adv summary{ cursor:pointer; padding: 14px 0; color: var(--paper); font-weight: 600; font-size: 14px; list-style: none; }
+  details.adv summary::-webkit-details-marker{ display:none; }
+  details.adv summary::before{ content: "＋ "; color: var(--green-bright); }
+  details.adv[open] summary::before{ content: "－ "; }
+  .adv-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; padding: 4px 0 20px; }
+  .adv-field label{ display:block; font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+  .adv-field input{
+    width:100%; padding: 9px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.06); color: var(--paper); font-family: 'Inter', sans-serif; font-size: 13.5px;
+  }
+  .adv-field input:focus{ outline: 1.5px solid var(--green); }
+  .adv-reset{
+    background:none; border: 1px solid rgba(255,255,255,0.28); color: var(--paper);
+    padding: 8px 14px; border-radius: 8px; font-size: 12.5px; cursor:pointer; margin-bottom: 18px;
+  }
+  .adv-reset:hover{ border-color: var(--green-bright); color: var(--green-bright); }
+
+  footer{ text-align:center; color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 30px; line-height: 1.6; }
+
+  @media (max-width: 560px){
+    .funnel{ grid-template-columns: 1fr; }
+    .ticket-bottom{ grid-template-columns: 1fr; }
+    .stub:first-child{ border-right:none; border-bottom: 1px dashed var(--line); }
+    .inputs-grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="eyebrow">VIAGO</div>
+    <h1>Simulador de Ingresos Viago</h1>
+    <p>Coloca cuántos registros directos esperas hacer al mes y por cuántos años quieres proyectar, y mira en segundos cuánto puedes ganar en comisiones.</p>
+  </div>
+
+  <div class="ticket">
+    <div class="ticket-top">
+      <div class="inputs-grid">
+        <div class="field">
+          <label for="directInput">Registros directos por mes</label>
+          <div class="input-row">
+            <div class="stepper">
+              <button type="button" id="minusBtn" aria-label="Reducir">–</button>
+              <input type="number" id="directInput" value="2.5" step="0.5" min="0" max="30">
+              <button type="button" id="plusBtn" aria-label="Aumentar">+</button>
+            </div>
+          </div>
+          <div class="range-row">
+            <input type="range" id="directSlider" min="0" max="15" step="0.5" value="2.5">
+            <div class="range-labels"><span>0</span><span>7.5</span><span>15</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Tiempo a proyectar</label>
+          <div class="input-row" style="gap:10px;">
+            <div class="stepper small">
+              <button type="button" id="yearsMinusBtn" aria-label="Reducir años">–</button>
+              <input type="number" id="yearsInput" value="1" step="1" min="0" max="10">
+              <button type="button" id="yearsPlusBtn" aria-label="Aumentar años">+</button>
+            </div>
+            <span class="input-hint">años</span>
+            <div class="stepper small">
+              <button type="button" id="monthsMinusBtn" aria-label="Reducir meses">–</button>
+              <input type="number" id="monthsInput" value="0" step="1" min="0" max="11">
+              <button type="button" id="monthsPlusBtn" aria-label="Aumentar meses">+</button>
+            </div>
+            <span class="input-hint">meses</span>
+          </div>
+          <div class="input-hint" style="margin-top:12px;">mínimo 1 mes en total, máximo 10 años</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="perf"></div>
+
+    <div class="ticket-bottom">
+      <div class="stub">
+        <div class="k">Ingreso mensual promedio</div>
+        <div class="v" id="avgMonthly">$0</div>
+        <div class="sub">promedio de todo el periodo</div>
+      </div>
+      <div class="stub">
+        <div class="k" id="totalLabel">Ingreso proyectado</div>
+        <div class="v accent" id="totalAnnual">$0</div>
+        <div class="sub" id="lastMonthNote">último mes estimado: $0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Actividad que necesitas cada mes</div>
+  <div class="funnel">
+    <div class="fcard"><div class="num" id="fContactos">0</div><div class="lbl">Contactos nuevos</div></div>
+    <div class="fcard"><div class="num" id="fPresentaciones">0</div><div class="lbl">Presentaciones del negocio</div></div>
+    <div class="fcard"><div class="num" id="fRegistros">0</div><div class="lbl">Registros directos</div></div>
+  </div>
+
+  <div class="chart-card">
+    <h3 id="chartTitle">Comisión total por año</h3>
+    <div class="note">Incluye bono directo, ciclos, bono al cuadrado, misión 30 y amplify.</div>
+    <div class="bars" id="barsWrap"></div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:14px;">
+    <div class="note" style="margin-bottom:0;">Cada vinculación directa cuenta como <strong>activa</strong> durante los meses que definas en Ajustes avanzados (6 por defecto). La Misión 30 se paga cada mes en que tus vinculaciones activas lleguen a la meta — con buen ritmo mensual, puedes alcanzarla varios meses seguidos.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Mes</th><th>Directos</th><th>Activos</th><th>Equipo</th><th>Directo</th>
+            <th>Ciclos</th><th>Bono²</th><th>Misión 30</th><th>Amplify</th><th>Total mes</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot>
+          <tr>
+            <td>Total periodo</td>
+            <td id="totDirectos"></td><td id="totEquipo"></td><td id="totDirecto"></td>
+            <td id="totCiclos"></td><td id="totBono2"></td><td id="totMision"></td>
+            <td id="totAmplify"></td><td id="totTotal"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <details class="adv">
+    <summary>Ajustes avanzados (tasas de conversión y valores de bono)</summary>
+    <div class="adv-grid">
+      <div class="adv-field"><label>% presentaciones que se registran</label><input type="number" id="advPresRatio" value="20" step="1"></div>
+      <div class="adv-field"><label>% contactos que aceptan presentación</label><input type="number" id="advContRatio" value="20" step="1"></div>
+      <div class="adv-field"><label>% de registros directos que son Constructores</label><input type="number" id="advConstructRatio" value="20" step="1"></div>
+      <div class="adv-field"><label>Multiplicador de equipo por Constructor</label><input type="number" id="advTeamMult" value="1.4" step="0.1"></div>
+      <div class="adv-field"><label>Valor bono Directo (por registro)</label><input type="number" id="advDirecto" value="400000" step="10000"></div>
+      <div class="adv-field"><label>Valor bono Ciclo (cada 4 registros)</label><input type="number" id="advCiclo" value="400000" step="10000"></div>
+      <div class="adv-field"><label>Meta Misión 30 (registros directos activos)</label><input type="number" id="advMisionMeta" value="30" step="1"></div>
+      <div class="adv-field"><label>Valor Misión 30</label><input type="number" id="advMisionValor" value="2000000" step="100000"></div>
+      <div class="adv-field"><label>Duración de cada vinculación directa (meses)</label><input type="number" id="advDuracion" value="6" step="1"></div>
+    </div>
+    <button class="adv-reset" id="resetAdv">Restablecer valores originales</button>
+  </details>
+
+  <footer>
+    Proyección construida a partir del plan de comisiones de Viago Direct. Los resultados son un estimado educativo,<br>
+    el ingreso real depende de tu actividad, tu equipo y las condiciones vigentes del plan.
+  </footer>
+</div>
+
+<script>
+const BONO2_TABLE = [[10,800000],[25,2000000],[50,4000000],[100,8000000],[175,12000000],[250,20000000],[500,40000000],[1000,80000000],[2000,144000000],[5000,340000000]];
+const AMPLIFY_TABLE = [[5000,1200000],[8000,2000000]];
+
+function lookupTiered(x, table){
+  let val = 0;
+  for(const [k,v] of table){ if(x >= k) val = v; else break; }
+  return val;
+}
+function fmt(n){ return '$' + Math.round(n).toLocaleString('es-CO'); }
+
+function getAdv(){
+  return {
+    presRatio: parseFloat(document.getElementById('advPresRatio').value)/100 || 0.2,
+    contRatio: parseFloat(document.getElementById('advContRatio').value)/100 || 0.2,
+    constructRatio: parseFloat(document.getElementById('advConstructRatio').value)/100 || 0.2,
+    teamMult: parseFloat(document.getElementById('advTeamMult').value) || 1.4,
+    valDirecto: parseFloat(document.getElementById('advDirecto').value) || 400000,
+    valCiclo: parseFloat(document.getElementById('advCiclo').value) || 400000,
+    misionMeta: parseFloat(document.getElementById('advMisionMeta').value) || 30,
+    misionValor: parseFloat(document.getElementById('advMisionValor').value) || 2000000,
+    duracion: Math.max(1, parseInt(document.getElementById('advDuracion').value) || 6)
+  };
+}
+
+function distributeMonthly(avgPerMonth, months){
+  const out = []; let prevCum = 0;
+  for(let i=1;i<=months;i++){ const cum = Math.round(avgPerMonth*i); out.push(cum - prevCum); prevCum = cum; }
+  return out;
+}
+
+function simulate(avgDirectPerMonth, totalMonths){
+  const adv = getAdv();
+  const months = Math.max(1, Math.round(totalMonths));
+  const directPattern = distributeMonthly(avgDirectPerMonth, months);
+
+  let cumDirect = 0, cumConstructores = 0, sTeamSum = 0, prevFloor4 = 0, combinedPrev = 0;
+  const rows = [];
+  let totals = {directos:0, equipo:0, directo:0, ciclo:0, bono2:0, mision:0, amplify:0, total:0};
+
+  for(let t=0; t<months; t++){
+    const d = directPattern[t];
+    cumDirect += d;
+    const newConstructores = Math.floor(cumDirect*adv.constructRatio) - cumConstructores;
+    cumConstructores += newConstructores;
+    const teamT = Math.floor(cumConstructores*adv.teamMult);
+    sTeamSum += teamT;
+    const combined = cumDirect + sTeamSum;
+
+    const directoB = adv.valDirecto*d;
+    const floor4 = Math.floor(combined/4);
+    const cicloB = adv.valCiclo*(floor4-prevFloor4);
+    prevFloor4 = floor4;
+    const bono2B = lookupTiered(Math.floor(combined/2), BONO2_TABLE);
+    const amplifyPts = 500*(d+teamT) + 50*combinedPrev;
+    const amplifyB = lookupTiered(amplifyPts, AMPLIFY_TABLE);
+
+    // Vinculaciones directas activas: cada una dura "duracion" meses, luego deja de contar.
+    const windowStart = Math.max(0, t - adv.duracion + 1);
+    let activeDirect = 0;
+    for(let k=windowStart; k<=t; k++){ activeDirect += directPattern[k]; }
+    const misionB = activeDirect >= adv.misionMeta ? adv.misionValor : 0;
+
+    combinedPrev = combined;
+
+    const totalMonth = directoB + cicloB + bono2B + misionB + amplifyB;
+    rows.push({mes:t+1, d, activeDirect, teamT, directoB, cicloB, bono2B, misionB, amplifyB, totalMonth});
+
+    totals.directos += d; totals.equipo += teamT; totals.directo += directoB; totals.ciclo += cicloB;
+    totals.bono2 += bono2B; totals.mision += misionB; totals.amplify += amplifyB; totals.total += totalMonth;
+  }
+  return {rows, totals, adv, months};
+}
+
+function render(){
+  const avgDirect = parseFloat(document.getElementById('directInput').value) || 0;
+  let years = parseInt(document.getElementById('yearsInput').value) || 0;
+  let extraMonths = parseInt(document.getElementById('monthsInput').value) || 0;
+  years = Math.min(10, Math.max(0, years));
+  extraMonths = Math.min(11, Math.max(0, extraMonths));
+  let totalMonths = years*12 + extraMonths;
+  if(totalMonths < 1){ totalMonths = 1; extraMonths = 1; years = 0; }
+  document.getElementById('yearsInput').value = years;
+  document.getElementById('monthsInput').value = extraMonths;
+  document.getElementById('directSlider').value = avgDirect;
+
+  const {rows, totals, adv, months} = simulate(avgDirect, totalMonths);
+
+  const registrosMes = avgDirect;
+  const presentacionesMes = adv.presRatio > 0 ? registrosMes/adv.presRatio : 0;
+  const contactosMes = adv.contRatio > 0 ? presentacionesMes/adv.contRatio : 0;
+  document.getElementById('fContactos').textContent = Math.round(contactosMes).toLocaleString('es-CO');
+  document.getElementById('fPresentaciones').textContent = Math.round(presentacionesMes).toLocaleString('es-CO');
+  document.getElementById('fRegistros').textContent = (Math.round(registrosMes*10)/10).toLocaleString('es-CO');
+
+  document.getElementById('avgMonthly').textContent = fmt(totals.total/months);
+  const yLabel = years > 0 ? `${years} ${years===1?'año':'años'}` : '';
+  const mLabel = extraMonths > 0 ? `${extraMonths} ${extraMonths===1?'mes':'meses'}` : '';
+  const periodoLabel = [yLabel, mLabel].filter(Boolean).join(' y ');
+  document.getElementById('totalLabel').textContent = 'Ingreso proyectado a ' + periodoLabel;
+  document.getElementById('totalAnnual').textContent = fmt(totals.total);
+  document.getElementById('lastMonthNote').textContent = 'último mes estimado: ' + fmt(rows[rows.length-1].totalMonth);
+
+  const useYearlyChart = months > 12;
+
+  // Yearly aggregation for chart (groups of 12; last group may be partial)
+  const yearTotals = [];
+  const yearLabels = [];
+  for(let start=0; start<months; start+=12){
+    const slice = rows.slice(start, start+12);
+    yearTotals.push(slice.reduce((s,r)=>s+r.totalMonth,0));
+    const num = Math.floor(start/12)+1;
+    yearLabels.push(slice.length < 12 ? `Año ${num} (${slice.length}m)` : `Año ${num}`);
+  }
+  document.getElementById('chartTitle').textContent = useYearlyChart ? 'Comisión total por año' : 'Comisión total por mes';
+
+  const barsWrap = document.getElementById('barsWrap');
+  barsWrap.innerHTML = '';
+  if(!useYearlyChart){
+    const maxVal = Math.max(...rows.map(r=>r.totalMonth), 1);
+    rows.forEach(r=>{
+      const col = document.createElement('div'); col.className = 'bar-col';
+      const bar = document.createElement('div'); bar.className = 'bar';
+      bar.style.height = Math.max(3, (r.totalMonth/maxVal)*100) + '%';
+      bar.title = 'Mes ' + r.mes + ': ' + fmt(r.totalMonth);
+      const lbl = document.createElement('div'); lbl.className = 'm-lbl'; lbl.textContent = 'M' + r.mes;
+      col.appendChild(bar); col.appendChild(lbl); barsWrap.appendChild(col);
+    });
+  } else {
+    const maxVal = Math.max(...yearTotals, 1);
+    yearTotals.forEach((v,i)=>{
+      const col = document.createElement('div'); col.className = 'bar-col';
+      const val = document.createElement('div'); val.className = 'm-val'; val.textContent = fmt(v);
+      const bar = document.createElement('div'); bar.className = 'bar';
+      bar.style.height = Math.max(3, (v/maxVal)*100) + '%';
+      bar.title = yearLabels[i] + ': ' + fmt(v);
+      const lbl = document.createElement('div'); lbl.className = 'm-lbl'; lbl.textContent = yearLabels[i];
+      col.appendChild(val); col.appendChild(bar); col.appendChild(lbl); barsWrap.appendChild(col);
+    });
+  }
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  let yearAccum = {directo:0,ciclo:0,bono2:0,mision:0,amplify:0,total:0,directos:0,equipo:0};
+  rows.forEach((r, idx)=>{
+    const tr = document.createElement('tr');
+    if(r.misionB > 0) tr.className = 'milestone';
+    tr.innerHTML = `
+      <td>Mes ${r.mes}</td><td>${r.d}</td><td>${r.activeDirect}</td><td>${r.teamT}</td><td>${fmt(r.directoB)}</td>
+      <td>${fmt(r.cicloB)}</td><td>${fmt(r.bono2B)}</td>
+      <td>${r.misionB ? fmt(r.misionB) : '—'}</td><td>${r.amplifyB ? fmt(r.amplifyB) : '—'}</td>
+      <td><strong>${fmt(r.totalMonth)}</strong></td>`;
+    tbody.appendChild(tr);
+
+    yearAccum.directos+=r.d; yearAccum.equipo+=r.teamT; yearAccum.directo+=r.directoB; yearAccum.ciclo+=r.cicloB;
+    yearAccum.bono2+=r.bono2B; yearAccum.mision+=r.misionB; yearAccum.amplify+=r.amplifyB; yearAccum.total+=r.totalMonth;
+
+    const isLastRow = idx === rows.length-1;
+    const closesFullYear = (idx+1) % 12 === 0;
+    if(months > 12 && (closesFullYear || isLastRow)){
+      const yr = document.createElement('tr'); yr.className = 'year-total';
+      const yearNum = Math.ceil((idx+1)/12);
+      const label = closesFullYear ? `Total año ${yearNum}` : `Total año ${yearNum} (parcial)`;
+      yr.innerHTML = `
+        <td>${label}</td><td>${yearAccum.directos.toFixed(0)}</td><td>—</td><td>${yearAccum.equipo.toFixed(0)}</td>
+        <td>${fmt(yearAccum.directo)}</td><td>${fmt(yearAccum.ciclo)}</td><td>${fmt(yearAccum.bono2)}</td>
+        <td>${yearAccum.mision ? fmt(yearAccum.mision) : '—'}</td><td>${fmt(yearAccum.amplify)}</td><td>${fmt(yearAccum.total)}</td>`;
+      tbody.appendChild(yr);
+      yearAccum = {directo:0,ciclo:0,bono2:0,mision:0,amplify:0,total:0,directos:0,equipo:0};
+    }
+  });
+
+  document.getElementById('totDirectos').textContent = totals.directos.toFixed(0);
+  document.getElementById('totEquipo').textContent = totals.equipo.toFixed(0);
+  document.getElementById('totDirecto').textContent = fmt(totals.directo);
+  document.getElementById('totCiclos').textContent = fmt(totals.ciclo);
+  document.getElementById('totBono2').textContent = fmt(totals.bono2);
+  document.getElementById('totMision').textContent = totals.mision ? fmt(totals.mision) : '—';
+  document.getElementById('totAmplify').textContent = fmt(totals.amplify);
+  document.getElementById('totTotal').textContent = fmt(totals.total);
+}
+
+document.getElementById('directInput').addEventListener('input', render);
+document.getElementById('directSlider').addEventListener('input', (e)=>{ document.getElementById('directInput').value = e.target.value; render(); });
+document.getElementById('minusBtn').addEventListener('click', ()=>{ const inp = document.getElementById('directInput'); inp.value = Math.max(0, (parseFloat(inp.value)||0) - 0.5); render(); });
+document.getElementById('plusBtn').addEventListener('click', ()=>{ const inp = document.getElementById('directInput'); inp.value = Math.min(30, (parseFloat(inp.value)||0) + 0.5); render(); });
+
+document.getElementById('yearsInput').addEventListener('input', render);
+document.getElementById('yearsMinusBtn').addEventListener('click', ()=>{ const inp = document.getElementById('yearsInput'); inp.value = Math.max(0, (parseInt(inp.value)||0) - 1); render(); });
+document.getElementById('yearsPlusBtn').addEventListener('click', ()=>{ const inp = document.getElementById('yearsInput'); inp.value = Math.min(10, (parseInt(inp.value)||0) + 1); render(); });
+
+document.getElementById('monthsInput').addEventListener('input', render);
+document.getElementById('monthsMinusBtn').addEventListener('click', ()=>{ const inp = document.getElementById('monthsInput'); inp.value = Math.max(0, (parseInt(inp.value)||0) - 1); render(); });
+document.getElementById('monthsPlusBtn').addEventListener('click', ()=>{ const inp = document.getElementById('monthsInput'); inp.value = Math.min(11, (parseInt(inp.value)||0) + 1); render(); });
+
+document.querySelectorAll('.adv-field input').forEach(inp=>{ inp.addEventListener('input', render); });
+
+document.getElementById('resetAdv').addEventListener('click', ()=>{
+  document.getElementById('advPresRatio').value = 20;
+  document.getElementById('advContRatio').value = 20;
+  document.getElementById('advConstructRatio').value = 20;
+  document.getElementById('advTeamMult').value = 1.4;
+  document.getElementById('advDirecto').value = 400000;
+  document.getElementById('advCiclo').value = 400000;
+  document.getElementById('advMisionMeta').value = 30;
+  document.getElementById('advMisionValor').value = 2000000;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
