@@ -88,6 +88,9 @@
   .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
   .stepper input:focus{ outline: 2px solid var(--green); outline-offset: -2px; }
   .input-hint{ font-size: 12.5px; color: var(--slate); }
+  .time-row{ display:flex; gap: 18px; }
+  .time-col{ display:flex; flex-direction:column; align-items:center; gap: 6px; }
+  .time-col .input-hint{ font-weight: 600; text-align:center; }
 
   .range-row{ margin-top: 16px; }
   input[type=range]{ width: 100%; accent-color: var(--green); height: 6px; }
@@ -204,19 +207,23 @@
         </div>
         <div class="field">
           <label>Tiempo a proyectar</label>
-          <div class="input-row" style="gap:10px;">
-            <div class="stepper small">
-              <button type="button" id="yearsMinusBtn" aria-label="Reducir años">–</button>
-              <input type="number" id="yearsInput" value="1" step="1" min="0" max="10">
-              <button type="button" id="yearsPlusBtn" aria-label="Aumentar años">+</button>
+          <div class="time-row">
+            <div class="time-col">
+              <div class="stepper small">
+                <button type="button" id="yearsMinusBtn" aria-label="Reducir años">–</button>
+                <input type="number" id="yearsInput" value="1" step="1" min="0" max="10">
+                <button type="button" id="yearsPlusBtn" aria-label="Aumentar años">+</button>
+              </div>
+              <span class="input-hint">años</span>
             </div>
-            <span class="input-hint">años</span>
-            <div class="stepper small">
-              <button type="button" id="monthsMinusBtn" aria-label="Reducir meses">–</button>
-              <input type="number" id="monthsInput" value="0" step="1" min="0" max="11">
-              <button type="button" id="monthsPlusBtn" aria-label="Aumentar meses">+</button>
+            <div class="time-col">
+              <div class="stepper small">
+                <button type="button" id="monthsMinusBtn" aria-label="Reducir meses">–</button>
+                <input type="number" id="monthsInput" value="0" step="1" min="0" max="11">
+                <button type="button" id="monthsPlusBtn" aria-label="Aumentar meses">+</button>
+              </div>
+              <span class="input-hint">meses</span>
             </div>
-            <span class="input-hint">meses</span>
           </div>
           <div class="input-hint" style="margin-top:12px;">mínimo 1 mes en total, máximo 10 años</div>
         </div>
