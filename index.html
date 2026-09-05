@@ -360,8 +360,15 @@ function simulate(avgDirectPerMonth, totalMonths){
     const floor4 = Math.floor(combined/4);
     const cicloB = adv.valCiclo*(floor4-prevFloor4);
     prevFloor4 = floor4;
-    const bono2B = lookupTiered(Math.floor(combined/2), BONO2_TABLE);
-    const amplifyPts = 500*(d+teamT) + 50*combinedPrev;
+
+    // Bono al Cuadrado: los socios nuevos de este mes cuentan 1 punto completo;
+    // todos los socios registrados en meses anteriores (a partir de su 2º mes) cuentan 0.5.
+    const bono2Combined = (d+teamT) + combinedPrev*0.5;
+    const bono2B = lookupTiered(Math.floor(bono2Combined/2), BONO2_TABLE);
+
+    // Amplify: un socio nuevo aporta 300 puntos de volumen en su mes de ingreso;
+    // desde su 2º mes en adelante aporta 50 puntos de volumen.
+    const amplifyPts = 300*(d+teamT) + 50*combinedPrev;
     const amplifyB = lookupTiered(amplifyPts, AMPLIFY_TABLE);
 
     // Vinculaciones directas activas: cada una dura "duracion" meses, luego deja de contar.
